@@ -1,0 +1,81 @@
+interface Logger {
+    log(message: string): void;
+}
+
+class LogToConsole implements Logger {
+    log(message: string): void {
+        console.log(message);
+    }
+}
+
+class Plotter {
+    private logger: Logger;
+    private positionX: number;
+    private positionY: number;
+    private direction: number;
+    private isCarriageDown: boolean;
+    private lineColor: string;
+
+    constructor(logger: Logger) {
+        this.logger = logger;
+        this.positionX = 0;
+        this.positionY = 0;
+        this.direction = 0;
+        this.isCarriageDown = false;
+        this.lineColor = 'Black';
+    }
+
+    private drawLine(x: number, y: number): void {
+        const message = `Чертим линию из (${this.positionX}, ${this.positionY}) в (${x}, ${y}) используя ${this.lineColor} цвет.`;
+        this.logger.log(message);
+        this.positionX = x;
+        this.positionY = y;
+    }
+
+    move(distance: number): void {
+        const x = this.positionX + distance * Math.cos(this.direction * Math.PI / 180);
+        const y = this.positionY + distance * Math.sin(this.direction * Math.PI / 180);
+        if (this.isCarriageDown) {
+            this.drawLine(x, y);
+        } else {
+            this.positionX = x;
+            this.positionY = y;
+        }
+
+    }
+
+    turn(angle: number): void {
+        this.direction += angle;
+    }
+
+    carriageDown(): void {
+        this.isCarriageDown = true;
+    }
+
+    carriageUp(): void {
+        this.isCarriageDown = false;
+    }
+
+    setColor(color: string): void {
+        this.lineColor = color;
+        this.logger.log(`Устанавливаем ${color} цвет линии.`);
+    }
+
+    setStartPosition(x: number, y: number): void {
+        this.positionX = x;
+        this.positionY = y;
+    }
+}
+
+function drawTriangle(plt: Plotter, size: number): void {
+    plt.setColor('Green')
+    for (let i = 0; i < 3; ++i) {
+        plt.carriageDown()
+        plt.move(size)
+        plt.carriageUp()
+        plt.turn(120.0)
+    }
+}
+
+const plotter = new Plotter(new LogToConsole());
+drawTriangle(plotter, 100.0);
